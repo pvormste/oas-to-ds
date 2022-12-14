@@ -1,0 +1,279 @@
+type Query {
+  """
+  For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+
+  Equivalent to GET /store/order/{orderId}
+  """
+  order(
+    """ID of order that needs to be fetched"""
+    orderId: BigInt!
+  ): Order
+
+  """
+  Multiple status values can be provided with comma separated strings
+
+  Equivalent to GET /pet/findByStatus
+  """
+  petFindByStatus(
+    """Status values that need to be considered for filter"""
+    status: Status3
+  ): [Pet]
+
+  """
+  Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+
+  Equivalent to GET /pet/findByTags
+  """
+  petFindByTags(
+    """Tags to filter by"""
+    tags: [String]
+  ): [Pet]
+
+  """
+  Get user by user name
+
+  Equivalent to GET /user/{username}
+  """
+  user(
+    """The name that needs to be fetched. Use user1 for testing. """
+    username: String!
+  ): User
+
+  """
+  Logs user into the system
+
+  Equivalent to GET /user/login
+  """
+  userLogin(
+    """The password for login in clear text"""
+    password: String
+
+    """The user name for login"""
+    username: String
+  ): String
+
+  """
+  A viewer that wraps all operations authenticated via security scheme 'api_key', which is of type 'apiKey'
+  """
+  viewerApiKey(apiKey: String!): ViewerApiKey
+
+  """
+  A viewer that wraps operations for all available authentication mechanisms
+  """
+  viewerAnyAuth(apiKey: ApiKeyInput): ViewerAnyAuth
+}
+
+type Order {
+  complete: Boolean
+  id: BigInt
+  petId: BigInt
+  quantity: Int
+  shipDate: String
+
+  """Order Status"""
+  status: Status2
+}
+
+"""
+The `BigInt` scalar type represents non-fractional signed whole numeric values.
+"""
+scalar BigInt
+
+enum Status2 {
+  PLACED
+  APPROVED
+  DELIVERED
+}
+
+type Pet {
+  category: Category
+  id: BigInt
+  name: String!
+  photoUrls: [String]!
+
+  """pet status in the store"""
+  status: Status
+  tags: [Tag]
+}
+
+type Category {
+  id: BigInt
+  name: String
+}
+
+enum Status {
+  AVAILABLE
+  PENDING
+  SOLD
+}
+
+type Tag {
+  id: BigInt
+  name: String
+}
+
+enum Status3 {
+  AVAILABLE
+  PENDING
+  SOLD
+}
+
+type User {
+  email: String
+  firstName: String
+  id: BigInt
+  lastName: String
+  password: String
+  phone: String
+
+  """User Status"""
+  userStatus: Int
+  username: String
+}
+
+"""A viewer for security scheme 'api_key'"""
+type ViewerApiKey {
+  """
+  Returns a single pet
+
+  Equivalent to GET /pet/{petId}
+  """
+  pet(
+    """ID of pet to return"""
+    petId: BigInt!
+  ): Pet
+
+  """
+  Returns a map of status codes to quantities
+
+  Equivalent to GET /store/inventory
+  """
+  storeInventory: JSON
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+"""Warning: Not every request will work with this viewer type"""
+type ViewerAnyAuth {
+  """
+  Returns a single pet
+
+  Equivalent to GET /pet/{petId}
+  """
+  pet(
+    """ID of pet to return"""
+    petId: BigInt!
+  ): Pet
+
+  """
+  Returns a map of status codes to quantities
+
+  Equivalent to GET /store/inventory
+  """
+  storeInventory: JSON
+}
+
+"""API key credentials for the security protocol 'api_key'"""
+input ApiKeyInput {
+  apiKey: String
+}
+
+type Mutation {
+  """
+  Add a new pet to the store
+
+  Equivalent to POST /pet
+  """
+  addPet(petInput: PetInput!): Pet
+
+  """
+  Creates list of users with given input array
+
+  Equivalent to POST /user/createWithList
+  """
+  createUsersWithListInput(userCreateWithListInput: [UserInput]): User
+
+  """
+  Place a new order in the store
+
+  Equivalent to POST /store/order
+  """
+  placeOrder(orderInput: OrderInput): Order
+
+  """
+  Update an existing pet by Id
+
+  Equivalent to PUT /pet
+  """
+  updatePet(petInput: PetInput!): Pet
+
+  """
+  uploads an image
+
+  Equivalent to POST /pet/{petId}/uploadImage
+  """
+  uploadFile(
+    """Additional Metadata"""
+    additionalMetadata: String
+
+    """String represents payload of content type 'application/octet-stream'"""
+    applicationOctetStreamInput: String
+
+    """ID of pet to update"""
+    petId: BigInt!
+  ): ApiResponse
+}
+
+input PetInput {
+  category: CategoryInput
+  id: BigInt
+  name: String!
+  photoUrls: [String]!
+
+  """pet status in the store"""
+  status: Status
+  tags: [TagInput]
+}
+
+input CategoryInput {
+  id: BigInt
+  name: String
+}
+
+input TagInput {
+  id: BigInt
+  name: String
+}
+
+input UserInput {
+  email: String
+  firstName: String
+  id: BigInt
+  lastName: String
+  password: String
+  phone: String
+
+  """User Status"""
+  userStatus: Int
+  username: String
+}
+
+input OrderInput {
+  complete: Boolean
+  id: BigInt
+  petId: BigInt
+  quantity: Int
+  shipDate: String
+
+  """Order Status"""
+  status: Status2
+}
+
+type ApiResponse {
+  code: Int
+  message: String
+  type: String
+}
